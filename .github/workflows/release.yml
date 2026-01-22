@@ -33,6 +33,13 @@ jobs:
       - name: Publish (self-contained)
         run: dotnet publish .\YellowPoint.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o output/self-contained
 
+      - name: Package artifacts
+        run: |
+          if (Test-Path output\framework-dependent.zip) { Remove-Item output\framework-dependent.zip }
+          if (Test-Path output\self-contained.zip) { Remove-Item output\self-contained.zip }
+          Compress-Archive -Path output\framework-dependent\* -DestinationPath output\framework-dependent.zip
+          Compress-Archive -Path output\self-contained\* -DestinationPath output\self-contained.zip
+
       - name: Upload artifact (framework-dependent)
         uses: actions/upload-artifact@v4
         with:
@@ -48,6 +55,6 @@ jobs:
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "output/**"
+          artifacts: "output/*.zip"
           allowUpdates: true
           generateReleaseNotes: true
