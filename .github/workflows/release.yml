@@ -28,10 +28,10 @@ jobs:
         run: dotnet build -c Release --no-restore
 
       - name: Publish (framework-dependent)
-        run: dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o output/framework-dependent
+        run: dotnet publish .\YellowPoint.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o output/framework-dependent
 
       - name: Publish (self-contained)
-        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o output/self-contained
+        run: dotnet publish .\YellowPoint.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o output/self-contained
 
       - name: Upload artifact (framework-dependent)
         uses: actions/upload-artifact@v4
@@ -46,6 +46,8 @@ jobs:
           path: output/self-contained/
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: ncipollo/release-action@v1
         with:
-          files: output/**
+          artifacts: "output/**"
+          allowUpdates: true
+          generateReleaseNotes: true
