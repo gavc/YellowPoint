@@ -150,11 +150,14 @@ public partial class MainForm : Form
 
     private void RegisterHotkey()
     {
-        NativeMethods.RegisterHotKey(Handle, HotkeyId, NativeMethods.MOD_CONTROL | NativeMethods.MOD_ALT, (int)Keys.Y);
+        if (!NativeMethods.RegisterHotKey(Handle, HotkeyId, NativeMethods.MOD_CONTROL | NativeMethods.MOD_ALT, (int)Keys.Y))
+        {
+            _trayIcon.ShowBalloonTip(3000, "YellowPoint", "Failed to register hotkey Ctrl+Alt+Y. It may be in use by another application.", ToolTipIcon.Warning);
+        }
     }
 
     private void UnregisterHotkey()
     {
-        NativeMethods.UnregisterHotKey(Handle, HotkeyId);
+        _ = NativeMethods.UnregisterHotKey(Handle, HotkeyId);
     }
 }

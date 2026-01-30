@@ -17,7 +17,7 @@ public sealed class SettingsService
         try
         {
             var json = File.ReadAllText(path);
-            return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+            return JsonSerializer.Deserialize(json, AppSettingsJsonContext.Default.AppSettings) ?? new AppSettings();
         }
         catch
         {
@@ -28,8 +28,12 @@ public sealed class SettingsService
     public void Save(AppSettings settings)
     {
         var path = GetSettingsPath();
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+        var directory = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+        var json = JsonSerializer.Serialize(settings, AppSettingsJsonContext.Default.AppSettings);
         File.WriteAllText(path, json);
     }
 
