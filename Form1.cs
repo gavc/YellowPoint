@@ -14,6 +14,7 @@ public partial class MainForm : Form
     private AppSettings _settings;
     private bool _highlightEnabled;
     private Icon? _appIcon;
+    private bool _hotkeyRegistered;
 
     public MainForm()
     {
@@ -56,8 +57,19 @@ public partial class MainForm : Form
         _cursorTimer = new System.Windows.Forms.Timer { Interval = 16 };
         _cursorTimer.Tick += (_, _) => UpdateOverlayPosition();
 
-        RegisterHotkey();
         UpdateTrayState();
+    }
+
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+        RegisterHotkey();
+    }
+
+    protected override void OnHandleDestroyed(EventArgs e)
+    {
+        UnregisterHotkey();
+        base.OnHandleDestroyed(e);
     }
 
     protected override void OnLoad(EventArgs e)
@@ -79,13 +91,13 @@ public partial class MainForm : Form
 
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
-        UnregisterHotkey();
         _cursorTimer.Stop();
         _cursorTimer.Dispose();
         _overlay.Dispose();
         _trayIcon.Visible = false;
         _trayIcon.Icon = null;
         _trayIcon.Dispose();
+        _trayMenu.Dispose();
         _appIcon?.Dispose();
         base.OnFormClosing(e);
     }
@@ -153,11 +165,19 @@ public partial class MainForm : Form
         if (!NativeMethods.RegisterHotKey(Handle, HotkeyId, NativeMethods.MOD_CONTROL | NativeMethods.MOD_ALT, (int)Keys.Y))
         {
             _trayIcon.ShowBalloonTip(3000, "YellowPoint", "Failed to register hotkey Ctrl+Alt+Y. It may be in use by another application.", ToolTipIcon.Warning);
+            _hotkeyRegistered = false;
+            return;
         }
+
+        _hotkeyRegistered = true;
     }
 
     private void UnregisterHotkey()
     {
-        _ = NativeMethods.UnregisterHotKey(Handle, HotkeyId);
+        if (_hotkeyRegistered)
+        {
+            _ = NativeMethods.UnregisterHotKey(Handle, HotkeyId);
+            _hotkeyRegistered = false;
+        }
     }
 }

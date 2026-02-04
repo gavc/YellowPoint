@@ -16,7 +16,7 @@ public sealed class OverlayForm : Form
         StartPosition = FormStartPosition.Manual;
         BackColor = Color.Magenta;
         TransparencyKey = Color.Magenta;
-        Opacity = _settings.Opacity;
+        Opacity = Math.Clamp(_settings.Opacity, 0.1, 1.0);
         DoubleBuffered = true;
         Enabled = false;
     }

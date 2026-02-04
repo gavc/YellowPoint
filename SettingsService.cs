@@ -17,9 +17,14 @@ public sealed class SettingsService
         try
         {
             var json = File.ReadAllText(path);
-            return JsonSerializer.Deserialize(json, AppSettingsJsonContext.Default.AppSettings) ?? new AppSettings();
+            var settings = JsonSerializer.Deserialize(json, AppSettingsJsonContext.Default.AppSettings) ?? new AppSettings();
+            return Sanitize(settings);
         }
-        catch
+        catch (IOException)
+        {
+            return new AppSettings();
+        }
+        catch (JsonException)
         {
             return new AppSettings();
         }
@@ -41,5 +46,12 @@ public sealed class SettingsService
     {
         var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YellowPoint");
         return Path.Combine(folder, FileName);
+    }
+
+    private static AppSettings Sanitize(AppSettings settings)
+    {
+        settings.Diameter = Math.Clamp(settings.Diameter, 10, 200);
+        settings.Opacity = Math.Clamp(settings.Opacity, 0.1, 1.0);
+        return settings;
     }
 }
