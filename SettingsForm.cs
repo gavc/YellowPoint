@@ -11,7 +11,7 @@ public sealed class SettingsForm : Form
 
     public SettingsForm(AppSettings current)
     {
-        Text = "YellowPoint Settings v202601";
+        Text = "YellowPoint Settings v1.0.1";
         AutoScaleMode = AutoScaleMode.Dpi;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
