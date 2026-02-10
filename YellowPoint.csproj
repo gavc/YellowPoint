@@ -13,7 +13,7 @@
     <AssemblyName>YellowPoint</AssemblyName>
     <Product>YellowPoint</Product>
     <Description>A cursor highlighter utility for Windows</Description>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     
     <!-- Optimize output -->
     <DebugType>embedded</DebugType>

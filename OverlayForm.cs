@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Drawing.Drawing2D;
 
 namespace YellowPoint;
@@ -39,7 +40,14 @@ public sealed class OverlayForm : Form
     protected override void OnHandleCreated(EventArgs e)
     {
         base.OnHandleCreated(e);
-        NativeMethods.EnableClickThrough(Handle);
+        try
+        {
+            NativeMethods.EnableClickThrough(Handle);
+        }
+        catch (Win32Exception ex)
+        {
+            AppLogger.LogException("Failed to apply click-through overlay styles.", ex);
+        }
     }
 
     protected override void OnPaint(PaintEventArgs e)

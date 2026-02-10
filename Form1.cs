@@ -1,8 +1,11 @@
+using System.Runtime.InteropServices;
+
 namespace YellowPoint;
 
 public partial class MainForm : Form
 {
     private const int HotkeyId = 1;
+    private const int CursorTimerIntervalMs = 25;
     private readonly NotifyIcon _trayIcon;
     private readonly ContextMenuStrip _trayMenu;
     private readonly ToolStripMenuItem _toggleItem;
@@ -54,7 +57,7 @@ public partial class MainForm : Form
 
         _trayIcon.DoubleClick += (_, _) => ToggleHighlight();
 
-        _cursorTimer = new System.Windows.Forms.Timer { Interval = 16 };
+        _cursorTimer = new System.Windows.Forms.Timer { Interval = CursorTimerIntervalMs };
         _cursorTimer.Tick += (_, _) => UpdateOverlayPosition();
 
         UpdateTrayState();
@@ -141,7 +144,15 @@ public partial class MainForm : Form
         if (dialog.ShowDialog(this) == DialogResult.OK)
         {
             _settings = dialog.UpdatedSettings;
-            _settingsService.Save(_settings);
+            if (!_settingsService.Save(_settings))
+            {
+                _trayIcon.ShowBalloonTip(
+                    4000,
+                    "YellowPoint",
+                    "Unable to save settings. Running with in-memory settings for this session.",
+                    ToolTipIcon.Warning);
+            }
+
             _overlay.ApplySettings(_settings);
             if (_highlightEnabled)
             {
@@ -164,7 +175,13 @@ public partial class MainForm : Form
     {
         if (!NativeMethods.RegisterHotKey(Handle, HotkeyId, NativeMethods.MOD_CONTROL | NativeMethods.MOD_ALT, (int)Keys.Y))
         {
-            _trayIcon.ShowBalloonTip(3000, "YellowPoint", "Failed to register hotkey Ctrl+Alt+Y. It may be in use by another application.", ToolTipIcon.Warning);
+            var errorCode = Marshal.GetLastWin32Error();
+            AppLogger.LogWarning($"Failed to register hotkey Ctrl+Alt+Y (Win32 error {errorCode}).");
+            _trayIcon.ShowBalloonTip(
+                4000,
+                "YellowPoint",
+                $"Failed to register hotkey Ctrl+Alt+Y (error {errorCode}). It may already be in use.",
+                ToolTipIcon.Warning);
             _hotkeyRegistered = false;
             return;
         }
@@ -176,7 +193,12 @@ public partial class MainForm : Form
     {
         if (_hotkeyRegistered)
         {
-            _ = NativeMethods.UnregisterHotKey(Handle, HotkeyId);
+            if (!NativeMethods.UnregisterHotKey(Handle, HotkeyId))
+            {
+                var errorCode = Marshal.GetLastWin32Error();
+                AppLogger.LogWarning($"Failed to unregister hotkey Ctrl+Alt+Y (Win32 error {errorCode}).");
+            }
+
             _hotkeyRegistered = false;
         }
     }
