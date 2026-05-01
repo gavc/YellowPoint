@@ -55,6 +55,15 @@ public partial class MainForm : Form
             ContextMenuStrip = _trayMenu
         };
 
+        _trayIcon.MouseClick += (_, e) =>
+        {
+            // Show context menu on left-click for better UX
+            if (e.Button == MouseButtons.Left)
+            {
+                _trayMenu.Show(Cursor.Position);
+            }
+        };
+
         _trayIcon.DoubleClick += (_, _) => ToggleHighlight();
 
         _cursorTimer = new System.Windows.Forms.Timer { Interval = CursorTimerIntervalMs };
