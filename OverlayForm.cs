@@ -74,6 +74,7 @@ public sealed class OverlayForm : Form
     {
         _settings = settings;
         Opacity = Math.Clamp(_settings.Opacity, 0.1, 1.0);
+        Size = new Size(_settings.Diameter, _settings.Diameter);
         Invalidate();
     }
 }

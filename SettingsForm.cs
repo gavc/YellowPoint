@@ -7,6 +7,7 @@ public sealed class SettingsForm : Form
     private readonly NumericUpDown _diameterInput;
     private readonly NumericUpDown _opacityInput;
     private readonly Button _colorButton;
+    private readonly Label _colorPreviewLabel;
     private int _selectedColorArgb;
 
     public AppSettings UpdatedSettings { get; private set; }
@@ -77,9 +78,9 @@ public sealed class SettingsForm : Form
         _colorButton.FlatAppearance.BorderColor = SystemColors.GrayText;
         _colorButton.Click += (_, _) => ChooseColor();
 
-        var colorPreviewLabel = new Label
+        _colorPreviewLabel = new Label
         {
-            Text = Color.FromArgb(_selectedColorArgb).Name,
+            Text = GetColorDisplayName(Color.FromArgb(_selectedColorArgb)),
             AutoSize = true,
             Location = new Point(210, 100),
             ForeColor = SystemColors.GrayText
@@ -124,7 +125,7 @@ public sealed class SettingsForm : Form
             });
         };
 
-        Controls.AddRange(new Control[] { diameterLabel, _diameterInput, opacityLabel, _opacityInput, colorLabel, _colorButton, colorPreviewLabel, okButton, cancelButton, repoLink });
+        Controls.AddRange(new Control[] { diameterLabel, _diameterInput, opacityLabel, _opacityInput, colorLabel, _colorButton, _colorPreviewLabel, okButton, cancelButton, repoLink });
 
         AcceptButton = okButton;
         CancelButton = cancelButton;
@@ -164,6 +165,21 @@ public sealed class SettingsForm : Form
         {
             _selectedColorArgb = dialog.Color.ToArgb();
             _colorButton.BackColor = dialog.Color;
+            _colorPreviewLabel.Text = GetColorDisplayName(dialog.Color);
         }
+    }
+
+    private static string GetColorDisplayName(Color color)
+    {
+        // Try to find a known color name, otherwise show hex
+        foreach (KnownColor kc in Enum.GetValues<KnownColor>())
+        {
+            var known = Color.FromKnownColor(kc);
+            if (known.ToArgb() == color.ToArgb() && !known.IsSystemColor)
+            {
+                return kc.ToString();
+            }
+        }
+        return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
     }
 }
