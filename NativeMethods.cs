@@ -10,6 +10,7 @@ internal static class NativeMethods
     public const int WM_NCHITTEST = 0x0084;
     public const int HTTRANSPARENT = -1;
     public const int WM_HOTKEY = 0x0312;
+    public const int WM_QUERYENDSESSION = 0x0011;
     public const int MOD_ALT = 0x0001;
     public const int MOD_CONTROL = 0x0002;
 
@@ -43,10 +44,6 @@ internal static class NativeMethods
     [DllImport("user32.dll", EntryPoint = "SetWindowLong", SetLastError = true)]
     private static extern IntPtr SetWindowLongPtr32(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [DllImport("kernel32.dll", SetLastError = false)]
-    private static extern void SetLastError(uint dwErrCode);
-
     private static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex) =>
         IntPtr.Size == 8 ? GetWindowLongPtr64(hWnd, nIndex) : GetWindowLongPtr32(hWnd, nIndex);
 
@@ -55,7 +52,6 @@ internal static class NativeMethods
 
     public static void EnableClickThrough(IntPtr handle)
     {
-        SetLastError(0);
         var style = GetWindowLongPtr(handle, GWL_EXSTYLE).ToInt64();
         var getError = Marshal.GetLastWin32Error();
         if (style == 0 && getError != 0)
@@ -65,7 +61,6 @@ internal static class NativeMethods
 
         style |= WS_EX_TRANSPARENT | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE;
 
-        SetLastError(0);
         var setResult = SetWindowLongPtr(handle, GWL_EXSTYLE, new IntPtr(style));
         var setError = Marshal.GetLastWin32Error();
         if (setResult == IntPtr.Zero && setError != 0)

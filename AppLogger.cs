@@ -71,7 +71,11 @@ internal static class AppLogger
         {
             try
             {
-                if (File.GetLastWriteTimeUtc(path) < cutoffUtc)
+                // Parse date from filename: yellowpoint-20260101.log
+                var fileName = Path.GetFileNameWithoutExtension(path);
+                var datePart = fileName.Replace("yellowpoint-", "");
+                if (DateTime.TryParseExact(datePart, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out var fileDate)
+                    && fileDate < cutoffUtc)
                 {
                     File.Delete(path);
                 }

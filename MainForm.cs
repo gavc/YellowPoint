@@ -81,21 +81,11 @@ public partial class MainForm : Form
         Hide();
     }
 
-    protected override void WndProc(ref Message m)
-    {
-        if (m.Msg == NativeMethods.WM_HOTKEY && m.WParam.ToInt32() == HotkeyId)
-        {
-            ToggleHighlight();
-            return;
-        }
-
-        base.WndProc(ref m);
-    }
-
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
         _cursorTimer.Stop();
         _cursorTimer.Dispose();
+        _overlay.Hide();
         _overlay.Dispose();
         _trayIcon.Visible = false;
         _trayIcon.Icon = null;
@@ -103,6 +93,25 @@ public partial class MainForm : Form
         _trayMenu.Dispose();
         _appIcon?.Dispose();
         base.OnFormClosing(e);
+    }
+
+    protected override void WndProc(ref Message m)
+    {
+        // Handle Windows shutdown/logoff events
+        if (m.Msg == NativeMethods.WM_QUERYENDSESSION)
+        {
+            // Allow shutdown and clean up gracefully
+            Close();
+            return;
+        }
+
+        if (m.Msg == NativeMethods.WM_HOTKEY && m.WParam.ToInt32() == HotkeyId)
+        {
+            ToggleHighlight();
+            return;
+        }
+
+        base.WndProc(ref m);
     }
 
     private void ToggleHighlight()
@@ -134,8 +143,15 @@ public partial class MainForm : Form
 
         var cursor = Cursor.Position;
         var radius = _settings.Diameter / 2;
-        _overlay.SetBounds(cursor.X - radius, cursor.Y - radius, _settings.Diameter, _settings.Diameter);
-        _overlay.Invalidate();
+        var newX = cursor.X - radius;
+        var newY = cursor.Y - radius;
+
+        // Only update if position actually changed to avoid redundant repaints
+        if (_overlay.Left != newX || _overlay.Top != newY || _overlay.Width != _settings.Diameter || _overlay.Height != _settings.Diameter)
+        {
+            _overlay.SetBounds(newX, newY, _settings.Diameter, _settings.Diameter);
+            _overlay.Invalidate();
+        }
     }
 
     private void OpenSettings()

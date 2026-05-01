@@ -6,11 +6,14 @@ public sealed class SettingsForm : Form
 {
     private readonly NumericUpDown _diameterInput;
     private readonly NumericUpDown _opacityInput;
+    private readonly Button _colorButton;
+    private int _selectedColorArgb;
 
     public AppSettings UpdatedSettings { get; private set; }
 
     public SettingsForm(AppSettings current)
     {
+        _selectedColorArgb = current.ColorArgb;
         var productVersion = Application.ProductVersion;
         Text = string.IsNullOrWhiteSpace(productVersion)
             ? "YellowPoint Settings"
@@ -20,7 +23,7 @@ public sealed class SettingsForm : Form
         MaximizeBox = false;
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterParent;
-        ClientSize = new Size(340, 180);
+        ClientSize = new Size(340, 220);
 
         var diameterLabel = new Label
         {
@@ -54,11 +57,39 @@ public sealed class SettingsForm : Form
             Width = 120
         };
 
+        var colorLabel = new Label
+        {
+            Text = "Color:",
+            AutoSize = true,
+            Location = new Point(20, 100)
+        };
+
+        _colorButton = new Button
+        {
+            Text = "",
+            Location = new Point(160, 96),
+            Size = new Size(40, 24),
+            BackColor = Color.FromArgb(_selectedColorArgb),
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand
+        };
+        _colorButton.FlatAppearance.BorderSize = 1;
+        _colorButton.FlatAppearance.BorderColor = SystemColors.GrayText;
+        _colorButton.Click += (_, _) => ChooseColor();
+
+        var colorPreviewLabel = new Label
+        {
+            Text = Color.FromArgb(_selectedColorArgb).Name,
+            AutoSize = true,
+            Location = new Point(210, 100),
+            ForeColor = SystemColors.GrayText
+        };
+
         var okButton = new Button
         {
             Text = "OK",
             DialogResult = DialogResult.OK,
-            Location = new Point(120, 110),
+            Location = new Point(120, 150),
             Width = 80,
             AutoSize = true,
             MinimumSize = new Size(80, 32)
@@ -68,7 +99,7 @@ public sealed class SettingsForm : Form
         {
             Text = "Cancel",
             DialogResult = DialogResult.Cancel,
-            Location = new Point(210, 110),
+            Location = new Point(210, 150),
             Width = 80,
             AutoSize = true,
             MinimumSize = new Size(80, 32)
@@ -81,7 +112,7 @@ public sealed class SettingsForm : Form
             LinkColor = Color.RoyalBlue,
             ActiveLinkColor = Color.DodgerBlue,
             VisitedLinkColor = Color.MediumPurple,
-            Location = new Point(20, 120),
+            Location = new Point(20, 160),
             Anchor = AnchorStyles.Left | AnchorStyles.Bottom
         };
 
@@ -93,7 +124,7 @@ public sealed class SettingsForm : Form
             });
         };
 
-        Controls.AddRange(new Control[] { diameterLabel, _diameterInput, opacityLabel, _opacityInput, okButton, cancelButton, repoLink });
+        Controls.AddRange(new Control[] { diameterLabel, _diameterInput, opacityLabel, _opacityInput, colorLabel, _colorButton, colorPreviewLabel, okButton, cancelButton, repoLink });
 
         AcceptButton = okButton;
         CancelButton = cancelButton;
@@ -113,9 +144,26 @@ public sealed class SettingsForm : Form
                 {
                     Diameter = (int)_diameterInput.Value,
                     Opacity = (double)_opacityInput.Value / 100d,
-                    ColorArgb = current.ColorArgb
+                    ColorArgb = _selectedColorArgb
                 };
             }
         };
+    }
+
+    private void ChooseColor()
+    {
+        using var dialog = new ColorDialog
+        {
+            FullOpen = true,
+            Color = Color.FromArgb(_selectedColorArgb),
+            AnyColor = true,
+            SolidColorOnly = true
+        };
+
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            _selectedColorArgb = dialog.Color.ToArgb();
+            _colorButton.BackColor = dialog.Color;
+        }
     }
 }
