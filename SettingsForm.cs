@@ -24,7 +24,7 @@ public sealed class SettingsForm : Form
         MaximizeBox = false;
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterParent;
-        ClientSize = new Size(340, 220);
+        ClientSize = new Size(340, 240);
 
         var diameterLabel = new Label
         {
@@ -106,6 +106,15 @@ public sealed class SettingsForm : Form
             MinimumSize = new Size(80, 32)
         };
 
+        var hotkeyLabel = new Label
+        {
+            Text = "Ctrl+Alt+Y to Show/Hide",
+            AutoSize = true,
+            Location = new Point(20, 130),
+            ForeColor = SystemColors.GrayText,
+            Font = new Font(Font.FontFamily, Font.Size - 1f)
+        };
+
         var repoLink = new LinkLabel
         {
             Text = "YellowPoint",
@@ -125,7 +134,7 @@ public sealed class SettingsForm : Form
             });
         };
 
-        Controls.AddRange(new Control[] { diameterLabel, _diameterInput, opacityLabel, _opacityInput, colorLabel, _colorButton, _colorPreviewLabel, okButton, cancelButton, repoLink });
+        Controls.AddRange(new Control[] { diameterLabel, _diameterInput, opacityLabel, _opacityInput, colorLabel, _colorButton, _colorPreviewLabel, okButton, cancelButton, hotkeyLabel, repoLink });
 
         AcceptButton = okButton;
         CancelButton = cancelButton;
