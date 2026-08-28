@@ -4,6 +4,8 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YellowPoint", "YellowPoint.csproj", "{E7A17D34-FC26-D34D-E5F6-A8CD68C4D3D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YellowPoint.Tests", "tests\YellowPoint.Tests\YellowPoint.Tests.csproj", "{40B5EA5C-F74D-49F0-A4E4-B162B6AEB07D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,6 +16,10 @@ Global
 		{E7A17D34-FC26-D34D-E5F6-A8CD68C4D3D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7A17D34-FC26-D34D-E5F6-A8CD68C4D3D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7A17D34-FC26-D34D-E5F6-A8CD68C4D3D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40B5EA5C-F74D-49F0-A4E4-B162B6AEB07D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40B5EA5C-F74D-49F0-A4E4-B162B6AEB07D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40B5EA5C-F74D-49F0-A4E4-B162B6AEB07D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40B5EA5C-F74D-49F0-A4E4-B162B6AEB07D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

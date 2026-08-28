@@ -4,7 +4,6 @@ namespace YellowPoint;
 
 public partial class MainForm : Form
 {
-    private const int HotkeyId = 1;
     private const int CursorTimerIntervalMs = 25;
     private readonly NotifyIcon _trayIcon;
     private readonly ContextMenuStrip _trayMenu;
@@ -106,15 +105,7 @@ public partial class MainForm : Form
 
     protected override void WndProc(ref Message m)
     {
-        // Handle Windows shutdown/logoff events
-        if (m.Msg == NativeMethods.WM_QUERYENDSESSION)
-        {
-            // Allow shutdown and clean up gracefully
-            Close();
-            return;
-        }
-
-        if (m.Msg == NativeMethods.WM_HOTKEY && m.WParam.ToInt32() == HotkeyId)
+        if (MainWindowMessageRouter.GetAction(m.Msg, m.WParam) == MainWindowMessageAction.ToggleHighlight)
         {
             ToggleHighlight();
             return;
@@ -152,15 +143,7 @@ public partial class MainForm : Form
 
         var cursor = Cursor.Position;
         var radius = _settings.Diameter / 2;
-        var newX = cursor.X - radius;
-        var newY = cursor.Y - radius;
-
-        // Only update if position actually changed to avoid redundant repaints
-        if (_overlay.Left != newX || _overlay.Top != newY || _overlay.Width != _settings.Diameter || _overlay.Height != _settings.Diameter)
-        {
-            _overlay.SetBounds(newX, newY, _settings.Diameter, _settings.Diameter);
-            _overlay.Invalidate();
-        }
+        _overlay.MoveTo(new Point(cursor.X - radius, cursor.Y - radius));
     }
 
     private void OpenSettings()
@@ -198,7 +181,7 @@ public partial class MainForm : Form
 
     private void RegisterHotkey()
     {
-        if (!NativeMethods.RegisterHotKey(Handle, HotkeyId, NativeMethods.MOD_CONTROL | NativeMethods.MOD_ALT, (int)Keys.Y))
+        if (!NativeMethods.RegisterHotKey(Handle, MainWindowMessageRouter.HotkeyId, NativeMethods.MOD_CONTROL | NativeMethods.MOD_ALT, (int)Keys.Y))
         {
             var errorCode = Marshal.GetLastWin32Error();
             AppLogger.LogWarning($"Failed to register hotkey Ctrl+Alt+Y (Win32 error {errorCode}).");
@@ -218,7 +201,7 @@ public partial class MainForm : Form
     {
         if (_hotkeyRegistered)
         {
-            if (!NativeMethods.UnregisterHotKey(Handle, HotkeyId))
+            if (!NativeMethods.UnregisterHotKey(Handle, MainWindowMessageRouter.HotkeyId))
             {
                 var errorCode = Marshal.GetLastWin32Error();
                 AppLogger.LogWarning($"Failed to unregister hotkey Ctrl+Alt+Y (Win32 error {errorCode}).");
